@@ -60,6 +60,35 @@ class tree:
         return paths
 
 
+    def get_subtree(self, path):
+        node = self
+
+        for index in path:
+            node = node.children[index]
+
+        return node
+
+
+    def replace_subtree(self, path, replacement):
+        if len(path) == 0:
+            return replacement
+
+        index = path[0]
+        remaining_path = path[1:]
+
+        new_children = list(self.children)
+
+        new_children[index] = self.children[index].replace_subtree(
+            remaining_path, replacement
+        )
+
+        return tree(
+            self.op,
+            children=tuple(new_children),
+            value=self.value
+        )
+
+
 def random_tree(max_depth):
     if max_depth == 0 or random.random() < 0.3:  # we set the probability of creating a leaf node to 0.3
         terminal = random.choice(["x", "const"])
