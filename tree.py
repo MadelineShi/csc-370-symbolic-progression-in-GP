@@ -48,6 +48,17 @@ class tree:
 
         raise ValueError("Unknown operator")
 
+    
+    def get_paths(self, path=()): # for mutation and crossover etc.
+        paths = [path]
+
+        for i in range(len(self.children)):
+            child = self.children[i]
+            child_paths = child.get_paths(path + (i,))
+            paths.extend(child_paths)
+
+        return paths
+
 
 def random_tree(max_depth):
     if max_depth == 0 or random.random() < 0.3:  # we set the probability of creating a leaf node to 0.3
