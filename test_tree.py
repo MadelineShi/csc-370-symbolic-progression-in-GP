@@ -31,7 +31,7 @@ def check_structure(node, max_depth):
 
 
 def test_evaluate():
-    # Hand-built expression (x + 2) * x ONLY for testing.
+    # Hand-built expression (x + 2) * x only for testing.
     candidate = tree(
         "*",
         children=(
