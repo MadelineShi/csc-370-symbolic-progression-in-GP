@@ -89,6 +89,21 @@ class tree:
         )
 
 
+    def depth(self):
+        if len(self.children) == 0:
+            return 0
+
+        deepest_child = 0
+
+        for child in self.children:
+            child_depth = child.depth()
+
+            if child_depth > deepest_child:
+                deepest_child = child_depth
+
+        return 1 + deepest_child
+
+
 def random_tree(max_depth):
     if max_depth == 0 or random.random() < 0.3:  # we set the probability of creating a leaf node to 0.3
         terminal = random.choice(["x", "const"])

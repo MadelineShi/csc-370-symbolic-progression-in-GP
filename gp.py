@@ -82,3 +82,34 @@ def mutate(candidate, max_depth):
     return mutated_tree
 
 
+def next_generation(population, fitness_scores, max_depth, mutation_rate):
+    best_index = 0
+
+    for index in range(1, len(population)):
+        if fitness_scores[index] < fitness_scores[best_index]:
+            best_index = index
+
+    new_population = [population[best_index]]
+
+    while len(new_population) < len(population):
+        candidate_a = tournament_selection(population, fitness_scores)
+        candidate_b = tournament_selection(population, fitness_scores)
+
+        child_a, child_b = crossover(candidate_a, candidate_b)
+
+        for child, original in (
+            (child_a, candidate_a),
+            (child_b, candidate_b)
+        ):
+            if child.depth() > max_depth:
+                child = original
+
+            if random.random() < mutation_rate:
+                child = mutate(child, max_depth)
+
+            new_population.append(child)
+
+            if len(new_population) == len(population):
+                break
+
+    return new_population
