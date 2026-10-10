@@ -82,6 +82,19 @@ def mutate(candidate, max_depth):
     return mutated_tree
 
 
+def crossover(candidate_a, candidate_b):
+    path_a = random.choice(candidate_a.get_paths())
+    path_b = random.choice(candidate_b.get_paths())
+
+    subtree_a = candidate_a.get_subtree(path_a)
+    subtree_b = candidate_b.get_subtree(path_b)
+
+    child_a = candidate_a.replace_subtree(path_a, subtree_b)
+    child_b = candidate_b.replace_subtree(path_b, subtree_a)
+
+    return child_a, child_b
+
+
 def next_generation(population, fitness_scores, max_depth, mutation_rate):
     best_index = 0
 
