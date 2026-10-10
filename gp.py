@@ -1,5 +1,4 @@
 import math
-import traning_data
 import random
 from tree import random_tree
 
