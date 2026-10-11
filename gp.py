@@ -125,3 +125,43 @@ def next_generation(population, fitness_scores, max_depth, mutation_rate):
                 break
 
     return new_population
+
+
+def evolve(
+    training_data,
+    population_size=100,
+    generations=50,
+    initial_depth=3,
+    max_depth=5,
+    mutation_rate=0.2,
+    seed=42
+):
+    random.seed(seed)
+
+    population = generate_population(population_size, initial_depth)
+
+    for generation in range(generations + 1):
+        fitness_scores = evaluate_population(population, training_data)
+
+        best_index = 0
+
+        for i in range(1, len(population)):
+            if fitness_scores[i] < fitness_scores[best_index]:
+                best_index = i
+
+        print(
+            "Generation:", generation,
+            "Best training MSE:", fitness_scores[best_index],
+            "Expression:", str(population[best_index]),
+            flush=True
+        )
+
+        if generation < generations:
+            population = next_generation(
+                population,
+                fitness_scores,
+                max_depth,
+                mutation_rate
+            )
+
+    return population, fitness_scores
