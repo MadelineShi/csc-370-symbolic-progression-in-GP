@@ -33,6 +33,10 @@ def split_dataset(dataset, seed=42):
 
 
 if __name__ == "__main__":
-    dataset = load_dataset1("data/dataset1.csv")
-    print("Number of rows:", len(dataset))
-    print("First three rows:", dataset[:3])
+    dataset1 = load_dataset1("data/dataset1.csv")
+
+    training_data, test_data = split_dataset(datase1)
+
+    print("Dataset1 total rows:", len(dataset1))
+    print("Training data rows:", len(training_data))
+    print("Test data rows:", len(test_data))
