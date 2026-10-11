@@ -1,5 +1,5 @@
 import csv
-import data
+import random
 
 def load_dataset1(filename):
     dataset = []
@@ -35,7 +35,7 @@ def split_dataset(dataset, seed=42):
 if __name__ == "__main__":
     dataset1 = load_dataset1("data/dataset1.csv")
 
-    training_data, test_data = split_dataset(datase1)
+    training_data, test_data = split_dataset(dataset1)
 
     print("Dataset1 total rows:", len(dataset1))
     print("Training data rows:", len(training_data))
