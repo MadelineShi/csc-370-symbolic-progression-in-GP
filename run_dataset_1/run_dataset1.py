@@ -11,12 +11,12 @@ if __name__ == "__main__":
 
     population, fitness_scores = evolve(
         training_data,
-        population_size=100, #10
-        generations=50, #2
-        initial_depth=3,
-        max_depth=5,
-        mutation_rate=0.2,
-        seed=42
+        population_size = 100, # 10 to test
+        generations = 50, # 2 to test
+        initial_depth = 3,
+        max_depth = 5,
+        mutation_rate = 0.2,
+        seed = 42
     )
 
     best_index = 0
