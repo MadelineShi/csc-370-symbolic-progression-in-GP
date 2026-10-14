@@ -70,7 +70,7 @@ class tree:
 
 
     def replace_subtree(self, path, replacement):
-        if len(path) == 0:
+        if len(path) == 0: # already arrive the node to be replaced
             return replacement
 
         index = path[0]
