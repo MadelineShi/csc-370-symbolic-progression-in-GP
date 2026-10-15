@@ -1,5 +1,6 @@
 import math
 import random
+import copy
 from tree import random_tree
 
 
@@ -65,31 +66,68 @@ def evaluate_population(population, training_data):
 
     return fitness_scores
 
+def collect_nodes(node, mother=None, side=None, depth=0):
+    locations = [(node, mother, side, depth)]
 
-def mutate(candidate, max_depth):
-    path = random.choice(candidate.get_paths())
+    if node.left is not None:
+        locations.extend(
+            collect_nodes(node.left, node, "left", depth + 1)
+        )
 
-    available_depth = max_depth - len(path) 
+    if node.right is not None:
+        locations.extend(
+            collect_nodes(node.right, node, "right", depth + 1)
+        )
 
-    if available_depth < 0:
-        raise ValueError("Selected node exceeds the depth limit")
+    return locations
 
+
+def mutate(candidate, max_depth): # I changed this since we are using pointers now
+    # Work on a copy ----Dr. R
+    child = copy.deepcopy(candidate)
+
+    locations = collect_nodes(child)
+    node, mother, side, depth = random.choice(locations)
+
+    available_depth = max_depth - depth
     replacement = random_tree(available_depth)
 
-    mutated_tree = candidate.replace_subtree(path, replacement)
+    if mother is None:
+        return replacement
 
-    return mutated_tree
+    if side == "left":
+        mother.left = replacement
+    else:
+        mother.right = replacement
+
+    return child
 
 
 def crossover(candidate_a, candidate_b):
-    path_a = random.choice(candidate_a.get_paths())
-    path_b = random.choice(candidate_b.get_paths())
+    child_a = copy.deepcopy(candidate_a)
+    child_b = copy.deepcopy(candidate_b)
 
-    subtree_a = candidate_a.get_subtree(path_a)
-    subtree_b = candidate_b.get_subtree(path_b)
+    node_a, mother_a, side_a, depth_a = random.choice(
+        collect_nodes(child_a)
+    )
 
-    child_a = candidate_a.replace_subtree(path_a, subtree_b)
-    child_b = candidate_b.replace_subtree(path_b, subtree_a)
+    node_b, mother_b, side_b, depth_b = random.choice(
+        collect_nodes(child_b)
+    )
+
+    if mother_a is None:
+        child_a = node_b
+    elif side_a == "left":
+        mother_a.left = node_b
+    else:
+        mother_a.right = node_b
+
+    if mother_b is None:
+        child_b = node_a
+    elif side_b == "left":
+        mother_b.left = node_a
+    else:
+        mother_b.right = node_a
 
     return child_a, child_b
 
