@@ -105,6 +105,9 @@ class tree:
 
 
 def random_tree(max_depth):
+    if max_depth < 0:
+        raise ValueError("max_depth cannot be negative")
+
     if max_depth == 0 or random.random() < 0.3:  # we set the probability of creating a leaf node to 0.3
         terminal = random.choice(["x", "const"])
 
