@@ -1,39 +1,30 @@
 import math
 import random
 import copy
-from tree import random_tree
+import numpy as np
+from tree import random_tree, ramped_half_and_half
+
+
+def fitness_arrays(candidate, X, Y):
+    with np.errstate(all = "ignore"):
+        prediction = candidate.evaluate(X)
+        mse = float(np.mean((prediction - Y) ** 2))
+    if not math.isfinite(mse):
+        return float("inf")
+    return mse
 
 
 def fitness(candidate, training_data):
     if(len(training_data) == 0):
         raise ValueError("Training data is empty")
 
-    total_error = 0
-
-    for x, y in training_data:
-        try:
-            prediction = candidate.evaluate(x)
-            squared_error = (prediction - y) ** 2
-
-        except (ZeroDivisionError, OverflowError):
-            return float("inf")
-
-        if not math.isfinite(squared_error):
-            return float("inf")
-
-        total_error += squared_error
-
-    return total_error / len(training_data)
+    X = np.array([x for x, y in training_data], dtype = float)
+    Y = np.array([y for x, y in training_data], dtype = float)
+    return fitness_arrays(candidate, X, Y)
 
 
 def generate_population(population_size, max_depth):
-    population = []
-
-    for _ in range(population_size):
-        tree = random_tree(max_depth)
-        population.append(tree)
-            
-    return population
+    return ramped_half_and_half(population_size, 2, max_depth)
 
 
 def tournament_selection(population, fitness_scores, tournament_size=3):
@@ -57,11 +48,11 @@ def tournament_selection(population, fitness_scores, tournament_size=3):
     return population[best_index]
     
 
-def evaluate_population(population, training_data):
+def evaluate_population(population, X, Y):
     fitness_scores = []
 
     for candidate in population:
-        score = fitness(candidate, training_data)
+        score = fitness_arrays(candidate, X, Y)
         fitness_scores.append(score)
 
     return fitness_scores
@@ -176,10 +167,12 @@ def evolve(
 ):
     random.seed(seed)
 
+    X = np.array([x for x, y in training_data], dtype = float)
+    Y = np.array([y for x, y in training_data], dtype = float)
     population = generate_population(population_size, initial_depth)
 
     for generation in range(generations + 1):
-        fitness_scores = evaluate_population(population, training_data)
+        fitness_scores = evaluate_population(population, X, Y)
 
         best_index = 0
 
@@ -187,10 +180,17 @@ def evolve(
             if fitness_scores[i] < fitness_scores[best_index]:
                 best_index = i
 
+        unique = len(set(str(t) for t in population)) / len(population)
+        mean_size = sum(t.size() for t in population) / len(population)
+        inf_frac = sum(1 for s in fitness_scores if s == float("inf")) / len(population)
+
         print(
             "Generation:", generation,
             "Best training MSE:", fitness_scores[best_index],
             "Expression:", str(population[best_index]),
+             "| unique:", round(unique, 2),            # 
+            "mean size:", round(mean_size, 1),         # 
+            "inf:", round(inf_frac, 2),                # 新加的仨
             flush=True
         )
 

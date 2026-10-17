@@ -14,7 +14,7 @@ if __name__ == "__main__":
         population_size = 50, # so far we have tried 50 and 500
         generations = 50, # so far we have tried 50 and 200
         initial_depth = 3,
-        max_depth = 5, #may need to change it
+        max_depth = 4, # ramped half-and-half now builds depths 2..4 (must stay <= max_depth)
         mutation_rate = 0.2,
         seed = 42
     )

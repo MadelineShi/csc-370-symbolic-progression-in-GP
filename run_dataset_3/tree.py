@@ -2,13 +2,8 @@ import numpy as np
 import random
 import math
 
-BINARY_OPS = ["+", "-", "*", "/", "**"]
-
-UNARY_OPS = [
-    "sin", "cos", "exp", "log",
-    "asin", "acos", "atan",
-    "sqrt", "cbrt"
-]
+BINARY_OPS = ["+", "-", "*", "/"]
+UNARY_OPS = ["sin", "cos", "exp", "log"]
 
 class tree:
     def __init__(self, op, left = None, right = None, value = None):
@@ -42,62 +37,30 @@ class tree:
             return x
 
         if self.op == "const":
-            return self.value
+            return np.full(x.shape, float(self.value))   # change: array of the constant
 
         # With analytic functions, every operator needs at least its left child 
         left_value = self.left.evaluate(x)
 
-        if not math.isfinite(left_value):
-            return float("nan")
-
         # Unary operators: only evaluate the left child
         if self.op == "sin":
-            return math.sin(left_value)
+            return np.sin(left_value)
 
         if self.op == "cos":
-            return math.cos(left_value)
+            return np.cos(left_value)
 
         if self.op == "exp":
-            try:
-                return math.exp(left_value)
-            except OverflowError:
-                return float("nan")
+            return np.exp(np.clip(left_value, -30.0, 30.0)) # clip the input so it won't overflow
 
         if self.op == "log":
-            if left_value <= 0:
-                return float("nan")
-            return math.log(left_value)
+            mag = np.abs(left_value)
+            return np.log(np.where(mag < 1e-9, 1.0, mag)) # 注意 #
 
-        if self.op == "asin":
-            if left_value < -1 or left_value > 1:
-                return float("nan")
-            return math.asin(left_value)
-
-        if self.op == "acos":
-            if left_value < -1 or left_value > 1:
-                return float("nan")
-            return math.acos(left_value)
-
-        if self.op == "atan":
-            return math.atan(left_value)
-
-        if self.op == "sqrt":
-            if left_value < 0:
-                return float("nan")
-            return math.sqrt(left_value)
-
-        if self.op == "cbrt":
-            if left_value < 0:
-                return -((-left_value) ** (1 / 3))
-            return left_value ** (1 / 3)
 
         if self.op not in BINARY_OPS: # check the remaining operators
             raise ValueError("Unknown operator: " + str(self.op))
         
         right_value = self.right.evaluate(x)
-
-        if not math.isfinite(right_value):
-            return float("nan")
 
         if self.op == "+":
             return left_value + right_value
@@ -107,59 +70,13 @@ class tree:
 
         if self.op == "*":
             return left_value * right_value
-
+ 
         if self.op == "/":
-            if right_value == 0:
-                return float("nan")
-            return left_value / right_value
+            tiny = np.abs(right_value) < 1e-6 # 这里也改！
+            result = np.where(tiny, 1.0, left_value / np.where(tiny, 1.0, right_value))
 
-        if self.op == "**":
-            try:
-                return math.pow(left_value, right_value)
-            except (ValueError, OverflowError):
-                return float("nan")
-
-
-    
-    def get_paths(self, path=()): # for mutation and crossover etc.
-        paths = [path]
-
-        for i in range(len(self.children)):
-            child = self.children[i]
-            child_paths = child.get_paths(path + (i,))
-            paths.extend(child_paths)
-
-        return paths
-
-
-    def get_subtree(self, path):
-        node = self
-
-        for index in path:
-            node = node.children[index]
-
-        return node
-
-
-    def replace_subtree(self, path, replacement):
-        if len(path) == 0: # already arrive the node to be replaced
-            return replacement
-
-        index = path[0]
-        remaining_path = path[1:]
-
-        new_children = list(self.children)
-
-        new_children[index] = self.children[index].replace_subtree(
-            remaining_path, replacement
-        )
-
-        return tree(
-            self.op,
-            children=tuple(new_children),
-            value=self.value
-        )
-
+        return np.clip(result, -1e12, 1e12)
+        
 
     def size(self):
         total = 1
@@ -188,11 +105,12 @@ class tree:
         return 1 + max(left_depth, right_depth)
 
 
-def random_tree(max_depth):
+def random_tree(max_depth, method = "grow", force_root_op = False):
     if max_depth < 0:
         raise ValueError("max_depth cannot be negative")
 
-    if max_depth == 0 or random.random() < 0.3:  # we set the probability of creating a leaf node to 0.3
+    stop_early = (method == "grow" and random.random() < 0.3)
+    if max_depth == 0 or (stop_early and not force_root_op): 
         terminal = random.choice(["x", "const"])
 
         if terminal == "x":
@@ -200,7 +118,7 @@ def random_tree(max_depth):
 
         return tree("const", value = random.randint(-10, 10))
     
-    op = random.choice(BINARY_OPS + UNARY_OPS)
+    op = choose_operator(BINARY_OPS + UNARY_OPS)
 
      # Every operator needs a left child
     left_child = random_tree(max_depth - 1)
@@ -215,3 +133,32 @@ def random_tree(max_depth):
     return tree(op, left=left_child, right=right_child)
 
 
+def ramped_half_and_half(population_size, min_depth = 2, max_depth = 6):
+    depths = list(range(min_depth, max_depth + 1))
+    population = []
+ 
+    for i in range(population_size):
+        depth = depths[i % len(depths)]
+        method = "full" if (i // len(depths)) % 2 == 0 else "grow"
+        population.append(random_tree(depth, method, force_root_op = True))
+ 
+    return population
+
+
+
+def choose_operator(operators):  # micro managing!
+    weights = []
+
+    for op in operators:
+        if op == "sin" or op == "exp":
+            weights.append(1.5)
+        else:
+            weights.append(1.0)
+
+    selected = random.choices(
+        operators,
+        weights=weights,
+        k=1
+    )
+
+    return selected[0]
