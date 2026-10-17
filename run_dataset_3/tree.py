@@ -151,7 +151,7 @@ def choose_operator(operators):  # micro managing!
 
     for op in operators:
         if op == "sin" or op == "exp":
-            weights.append(1.5)
+            weights.append(BOOST)
         else:
             weights.append(1.0)
 
