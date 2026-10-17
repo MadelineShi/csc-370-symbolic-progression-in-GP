@@ -1,5 +1,6 @@
 from data import load_dataset3, split_dataset
 from gp import evolve, fitness
+import tree as tree_module
 
 
 if __name__ == "__main__":
@@ -9,12 +10,13 @@ if __name__ == "__main__":
     print("Training rows:", len(training_data), flush=True)
     print("Test rows:", len(test_data), flush=True)
 
+    tree_module.BOOST = 2.0 # here define the BOOST
     population, fitness_scores = evolve(
         training_data,
-        population_size = 50, # so far we have tried 50 and 500
-        generations = 50, # so far we have tried 50 and 200
+        population_size = 500, # so far we have tried 50 and 500
+        generations = 200, # so far we have tried 50 and 200
         initial_depth = 3,
-        max_depth = 4, # ramped half-and-half now builds depths 2..4 (must stay <= max_depth)
+        max_depth = 8, # ramped half-and-half now builds depths 2..4 (must stay <= max_depth)
         mutation_rate = 0.2,
         seed = 42
     )
