@@ -151,7 +151,7 @@ def next_generation(population, fitness_scores, max_depth, mutation_rate):
             (child_a, candidate_a),
             (child_b, candidate_b)
         ):
-            if child.depth() > max_depth:
+            if child.depth() > max_depth: # damn sets a hard limit of how my data can fit, we need to go deeper
                 child = original
 
             if random.random() < mutation_rate:
