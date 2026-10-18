@@ -113,16 +113,6 @@ class tree:
         return 1 + deepest_child
 
 
-    def size(self):
-        # Tree size is used to penalize overly complicated expressions.
-        total = 1
-
-        for child in self.children:
-            total += child.size()
-
-        return total
-
-
 def random_tree(max_depth):
     if max_depth < 0:
         raise ValueError("max_depth cannot be negative")

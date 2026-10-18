@@ -25,16 +25,11 @@ def mean_squared_error(candidate, data):
     return total_error / len(data)
 
 
-def fitness(candidate, training_data, complexity_weight=0.001):
+def fitness(candidate, training_data):
     if(len(training_data) == 0):
         raise ValueError("Training data is empty")
 
-    error = mean_squared_error(candidate, training_data)
-
-    # Dataset 2 adds a small penalty so simpler trees are preferred.
-    complexity_penalty = complexity_weight * candidate.size()
-
-    return error + complexity_penalty
+    return mean_squared_error(candidate, training_data)
 
 
 def generate_population(population_size, max_depth):
@@ -163,7 +158,7 @@ def evolve(
 
         print(
             "Generation:", generation,
-            "Best fitness:", fitness_scores[best_index],
+            "Best training MSE:", fitness_scores[best_index],
             "Expression:", str(population[best_index]),
             flush=True
         )
