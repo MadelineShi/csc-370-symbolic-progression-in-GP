@@ -1,7 +1,7 @@
 import csv
 import random
 
-def load_dataset1(filename):
+def load_dataset2(filename):
     dataset = []
 
     with open(filename, "r", newline="") as file:
@@ -9,9 +9,12 @@ def load_dataset1(filename):
         next(reader)  # skip the first row (the header)
 
         for row in reader:
-            x = float(row[0])
-            y = float(row[1])
-            dataset.append((x, y))
+            # Dataset 2 has three inputs instead of the one input in Dataset 1.
+            x1 = float(row[0])
+            x2 = float(row[1])
+            x3 = float(row[2])
+            y = float(row[3])
+            dataset.append(((x1, x2, x3), y))
 
     return dataset
     
@@ -33,10 +36,10 @@ def split_dataset(dataset, seed=42):
 
 
 if __name__ == "__main__":
-    dataset1 = load_dataset1("data/dataset1.csv")
+    dataset2 = load_dataset2("data/dataset2.csv")
 
-    training_data, test_data = split_dataset(dataset1)
+    training_data, test_data = split_dataset(dataset2)
 
-    print("Dataset1 total rows:", len(dataset1))
+    print("Dataset2 total rows:", len(dataset2))
     print("Training data rows:", len(training_data))
     print("Test data rows:", len(test_data))

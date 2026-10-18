@@ -9,8 +9,14 @@ from test_tree import check_structure
 
 random.seed(42)
 
-# example y = 2x + 1 for checking the code
-training_data = [(-2, -3), (-1, -1), (0, 1), (1, 3), (2, 5)]
+# Dataset 2 test data uses three inputs. This example is y = x1 + x2 + x3.
+training_data = [
+    ((1.0, 2.0, 3.0), 6.0),
+    ((2.0, 4.0, 1.0), 7.0),
+    ((-1.0, 3.0, 2.0), 4.0),
+    ((5.0, 1.0, -2.0), 4.0),
+    ((0.0, 2.0, 1.0), 3.0),
+]
 
 population = generate_population(6, 2)
 

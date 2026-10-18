@@ -1,4 +1,3 @@
-import numpy as np
 import random
 
 class tree:
@@ -8,9 +7,10 @@ class tree:
         self.value = value
 
 
-    def __str__(self): # this is for testing if we are generating a legal formula of x!
-        if self.op == "x":
-            return "x"
+    def __str__(self): # this is for testing if we are generating a legal formula!
+        # Dataset 2 has three variables instead of only x.
+        if self.op in ("x1", "x2", "x3"):
+            return self.op
 
         if self.op == "const":
             return str(self.value)
@@ -21,16 +21,25 @@ class tree:
         return f"({left} {self.op} {right})"
 
 
-    def evaluate(self,x):
-        if self.op == "x":
-            return x
+    def evaluate(self, inputs):
+        # Dataset 2 passes all three inputs to every part of the tree.
+        x1, x2, x3 = inputs
+
+        if self.op == "x1":
+            return x1
+
+        if self.op == "x2":
+            return x2
+
+        if self.op == "x3":
+            return x3
 
         if self.op == "const":
             return self.value
 
         #if it is an operator, evalute its children!
-        left = self.children[0].evaluate(x)
-        right = self.children[1].evaluate(x)
+        left = self.children[0].evaluate(inputs)
+        right = self.children[1].evaluate(inputs)
 
         if self.op == "+":
                 return left + right
@@ -104,17 +113,29 @@ class tree:
         return 1 + deepest_child
 
 
+    def size(self):
+        # Tree size is used to penalize overly complicated expressions.
+        total = 1
+
+        for child in self.children:
+            total += child.size()
+
+        return total
+
+
 def random_tree(max_depth):
     if max_depth < 0:
         raise ValueError("max_depth cannot be negative")
 
     if max_depth == 0 or random.random() < 0.3:  # we set the probability of creating a leaf node to 0.3
-        terminal = random.choice(["x", "const"])
+        # Dataset 2 can use any of its three variables as a terminal.
+        terminal = random.choice(["x1", "x2", "x3", "const"])
 
-        if terminal == "x":
-            return tree("x", children = ())
+        if terminal in ("x1", "x2", "x3"):
+            return tree(terminal, children = ())
 
-        constant = random.randint(-10, 10)
+        # Dataset 2 allows real-valued constants instead of only integers.
+        constant = random.uniform(-10, 10)
         return tree("const", children=(), value = constant)
     
     op = random.choice(["+", "-", "*", "/"])

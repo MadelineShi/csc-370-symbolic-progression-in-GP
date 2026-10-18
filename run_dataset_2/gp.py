@@ -3,15 +3,15 @@ import random
 from tree import random_tree
 
 
-def fitness(candidate, training_data):
-    if(len(training_data) == 0):
-        raise ValueError("Training data is empty")
+def mean_squared_error(candidate, data):
+    if(len(data) == 0):
+        raise ValueError("Data is empty")
 
     total_error = 0
 
-    for x, y in training_data:
+    for inputs, y in data:
         try:
-            prediction = candidate.evaluate(x)
+            prediction = candidate.evaluate(inputs)
             squared_error = (prediction - y) ** 2
 
         except (ZeroDivisionError, OverflowError):
@@ -22,7 +22,19 @@ def fitness(candidate, training_data):
 
         total_error += squared_error
 
-    return total_error / len(training_data)
+    return total_error / len(data)
+
+
+def fitness(candidate, training_data, complexity_weight=0.001):
+    if(len(training_data) == 0):
+        raise ValueError("Training data is empty")
+
+    error = mean_squared_error(candidate, training_data)
+
+    # Dataset 2 adds a small penalty so simpler trees are preferred.
+    complexity_penalty = complexity_weight * candidate.size()
+
+    return error + complexity_penalty
 
 
 def generate_population(population_size, max_depth):
@@ -151,7 +163,7 @@ def evolve(
 
         print(
             "Generation:", generation,
-            "Best training MSE:", fitness_scores[best_index],
+            "Best fitness:", fitness_scores[best_index],
             "Expression:", str(population[best_index]),
             flush=True
         )
