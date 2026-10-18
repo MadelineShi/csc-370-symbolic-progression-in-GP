@@ -2,6 +2,7 @@ import numpy as np
 import random
 import math
 
+BOOST = 2.0
 BINARY_OPS = ["+", "-", "*", "/"]
 UNARY_OPS = ["sin", "cos", "exp", "log"]
 
