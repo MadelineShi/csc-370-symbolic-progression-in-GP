@@ -51,8 +51,9 @@ class tree:
                 return left * right
 
         if self.op == "/":
-            if right == 0:
-                raise ZeroDivisionError("Cannot divide by zero")
+            # Dataset 2 has x3 values recorded as 0, so protect division to let these trees survive.
+            if abs(right) < 0.000001:
+                return 1.0
             return left / right
 
         raise ValueError("Unknown operator")
