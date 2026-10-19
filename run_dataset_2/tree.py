@@ -125,7 +125,8 @@ def random_tree(max_depth):
             return tree(terminal, children = ())
 
         # Dataset 2 allows real-valued constants instead of only integers.
-        constant = random.uniform(-10, 10)
+        # The wider range helps Dataset 2 find constants after input scaling.
+        constant = random.uniform(-100, 100)
         return tree("const", children=(), value = constant)
     
     op = random.choice(["+", "-", "*", "/"])
