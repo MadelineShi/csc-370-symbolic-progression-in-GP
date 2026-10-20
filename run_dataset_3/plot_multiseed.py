@@ -1,3 +1,5 @@
+# This plot-generating code is provided by generative AI tool. #
+
 # Plot many seeds of one (or several) settings:
 #   left : best training MSE vs generation, one thin line per seed + bold median (log scale)
 #   right: final TEST MSE of every seed (one dot per seed) + median bar

@@ -18,7 +18,7 @@ if __name__ == "__main__":
         initial_depth = 3,
         max_depth = 8, # ramped half-and-half now builds depths 2..4 (must stay <= max_depth)
         mutation_rate = 0.2,
-        seed = 42
+        seed = 8
     )
 
     best_index = 0

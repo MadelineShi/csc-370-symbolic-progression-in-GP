@@ -1,3 +1,5 @@
+# This plot-generating code is provided by generative AI tool. #
+
 """Save this file in run_dataset_3, beside tree.py and data.py.
 
 Run from the project root:
@@ -21,7 +23,7 @@ from tree import tree
 
 
 # Change these only if the log filename or original split seed differs.
-LOG_FILENAME = "records/multiseed/fullops_boost2_pop200_gen400/seed8.log"
+LOG_FILENAME = "records/boost2_pop500_gen200_seed8.log"
 DATA_SPLIT_SEED = 42
 
 
@@ -204,7 +206,7 @@ def main():
         ax.grid(True, alpha=0.2)
 
     fig.suptitle(
-        f"{log_path.stem} | training MSE = {recomputed_mse:,.2f}"
+        f"boost2_pop500_gen200_seed8 | training MSE = {recomputed_mse:,.2f}"
     )
 
     output_folder = folder / "plots"

@@ -1,3 +1,5 @@
+# This plot-generating code is provided by generative AI tool. #
+
 # Run the SAME setting with many random seeds, save one log per seed + a summary table.
 # Usage (from the project root, NOT from inside run_dataset_3):
 #   python3 run_dataset_3/run_multiseed.py                 # one run at a time
