@@ -1,6 +1,9 @@
 import math
 import random
-from tree import random_tree
+from tree import random_tree, tree
+
+COMPLEXITY_PENALTY_PER_NODE = 100000000
+CONSTANT_MUTATION_CHANGE = 5
 
 
 def mean_squared_error(candidate, data):
@@ -50,7 +53,10 @@ def fitness(candidate, training_data):
     if(len(training_data) == 0):
         raise ValueError("Training data is empty")
 
-    return mean_squared_error(candidate, training_data)
+    # Dataset 2 adds a small penalty so simpler equations are preferred when their errors are close.
+    complexity_penalty = candidate.size() * COMPLEXITY_PENALTY_PER_NODE
+
+    return mean_squared_error(candidate, training_data) + complexity_penalty
 
 
 def generate_population(population_size, max_depth):
@@ -96,6 +102,17 @@ def evaluate_population(population, training_data):
 
 def mutate(candidate, max_depth):
     path = random.choice(candidate.get_paths())
+
+    selected_node = candidate.get_subtree(path)
+
+    # Dataset 2 uses real constants, so mutation can make a small adjustment instead of replacing them.
+    if selected_node.op == "const":
+        new_constant = selected_node.value + random.uniform(
+            -CONSTANT_MUTATION_CHANGE,
+            CONSTANT_MUTATION_CHANGE
+        )
+        replacement = tree("const", children=(), value=new_constant)
+        return candidate.replace_subtree(path, replacement)
 
     available_depth = max_depth - len(path) 
 
@@ -189,13 +206,15 @@ def evolve(
             if fitness_scores[i] < fitness_scores[best_index]:
                 best_index = i
 
-        normalized_mse = fitness_scores[best_index]
+        best_mse = mean_squared_error(population[best_index], training_data)
+        normalized_mse = best_mse
         if y_variance != 0:
             normalized_mse = normalized_mse / y_variance
 
         print(
             "Generation:", generation,
-            "Best training MSE:", fitness_scores[best_index],
+            "Best training fitness:", fitness_scores[best_index],
+            "Training MSE:", best_mse,
             "Normalized MSE:", normalized_mse,
             "Expression:", str(population[best_index]),
             flush=True
