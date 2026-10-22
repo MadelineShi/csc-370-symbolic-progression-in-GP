@@ -1,0 +1,220 @@
+import math
+import random
+from tree import random_tree, tree
+
+COMPLEXITY_PENALTY_PER_NODE = 100000000
+CONSTANT_MUTATION_CHANGE = 5
+
+
+def mean_squared_error(candidate, data):
+    if(len(data) == 0):
+        raise ValueError("Data is empty")
+
+    total_error = 0
+
+    for inputs, y in data:
+        try:
+            prediction = candidate.evaluate(inputs)
+            squared_error = (prediction - y) ** 2
+
+        except (ZeroDivisionError, OverflowError):
+            return float("inf")
+
+        if not math.isfinite(squared_error):
+            return float("inf")
+
+        total_error += squared_error
+
+    return total_error / len(data)
+
+
+def normalized_mean_squared_error(candidate, data):
+    mse = mean_squared_error(candidate, data)
+
+    total_y = 0
+    for inputs, y in data:
+        total_y += y
+
+    y_average = total_y / len(data)
+
+    total_variance = 0
+    for inputs, y in data:
+        total_variance += (y - y_average) ** 2
+
+    y_variance = total_variance / len(data)
+
+    if y_variance == 0:
+        return mse
+
+    return mse / y_variance
+
+
+def fitness(candidate, training_data):
+    # add a penalty so it doesnt keep making huge trees
+    complexity_penalty = candidate.size() * COMPLEXITY_PENALTY_PER_NODE
+
+    return mean_squared_error(candidate, training_data) + complexity_penalty
+
+
+def generate_population(population_size, max_depth):
+    population = []
+
+    for _ in range(population_size):
+        population.append(random_tree(max_depth))
+            
+    return population
+
+
+def tournament_selection(population, fitness_scores, tournament_size=3):
+    if len(population) != len(fitness_scores):
+        raise ValueError("Each tree needs one fitness score")
+
+    if tournament_size < 1 or tournament_size > len(population):
+        raise ValueError("Invalid tournament size")
+
+    indices = random.sample( # pick the trees for the tournament
+        range(len(population)),
+        tournament_size
+    )
+
+    best_index = indices[0]
+
+    for index in indices[1:]:
+        if fitness_scores[index] < fitness_scores[best_index]:
+            best_index = index
+
+    return population[best_index]
+    
+
+def evaluate_population(population, training_data):
+    fitness_scores = []
+
+    for candidate in population:
+        fitness_scores.append(fitness(candidate, training_data))
+
+    return fitness_scores
+
+
+def mutate(candidate, max_depth):
+    path = random.choice(candidate.get_paths())
+
+    selected_node = candidate.get_subtree(path)
+
+    # if we picked a constant just move it a little
+    if selected_node.op == "const":
+        new_constant = selected_node.value + random.uniform(
+            -CONSTANT_MUTATION_CHANGE,
+            CONSTANT_MUTATION_CHANGE
+        )
+        replacement = tree("const", children=(), value=new_constant)
+        return candidate.replace_subtree(path, replacement)
+
+    available_depth = max_depth - len(path) 
+    replacement = random_tree(available_depth)
+
+    return candidate.replace_subtree(path, replacement)
+
+
+def crossover(candidate_a, candidate_b):
+    path_a = random.choice(candidate_a.get_paths())
+    path_b = random.choice(candidate_b.get_paths())
+
+    subtree_a = candidate_a.get_subtree(path_a)
+    subtree_b = candidate_b.get_subtree(path_b)
+
+    child_a = candidate_a.replace_subtree(path_a, subtree_b)
+    child_b = candidate_b.replace_subtree(path_b, subtree_a)
+
+    return child_a, child_b
+
+
+def next_generation(population, fitness_scores, max_depth, mutation_rate):
+    best_index = 0
+
+    for index in range(1, len(population)):
+        if fitness_scores[index] < fitness_scores[best_index]:
+            best_index = index
+
+    new_population = [population[best_index]]
+
+    while len(new_population) < len(population):
+        candidate_a = tournament_selection(population, fitness_scores)
+        candidate_b = tournament_selection(population, fitness_scores)
+
+        child_a, child_b = crossover(candidate_a, candidate_b)
+
+        for child, original in (
+            (child_a, candidate_a),
+            (child_b, candidate_b)
+        ):
+            if child.depth() > max_depth:
+                child = original
+
+            if random.random() < mutation_rate:
+                child = mutate(child, max_depth)
+
+            new_population.append(child)
+
+            if len(new_population) == len(population):
+                break
+
+    return new_population
+
+
+def evolve(
+    training_data,
+    population_size=100,
+    generations=50,
+    initial_depth=3,
+    max_depth=5,
+    mutation_rate=0.2,
+    seed=42
+):
+    random.seed(seed)
+
+    total_y = 0
+    for inputs, y in training_data:
+        total_y += y
+
+    y_average = total_y / len(training_data)
+
+    total_variance = 0
+    for inputs, y in training_data:
+        total_variance += (y - y_average) ** 2
+
+    y_variance = total_variance / len(training_data)
+
+    population = generate_population(population_size, initial_depth)
+
+    for generation in range(generations + 1):
+        fitness_scores = evaluate_population(population, training_data)
+
+        best_index = 0
+
+        for i in range(1, len(population)):
+            if fitness_scores[i] < fitness_scores[best_index]:
+                best_index = i
+
+        best_mse = mean_squared_error(population[best_index], training_data)
+        normalized_mse = best_mse
+        if y_variance != 0:
+            normalized_mse = normalized_mse / y_variance
+
+        print(
+            "Generation:", generation,
+            "Best training fitness:", fitness_scores[best_index],
+            "Training MSE:", best_mse,
+            "Normalized MSE:", normalized_mse,
+            "Expression:", str(population[best_index]),
+            flush=True
+        )
+
+        if generation < generations:
+            population = next_generation(
+                population,
+                fitness_scores,
+                max_depth,
+                mutation_rate
+            )
+
+    return population, fitness_scores
