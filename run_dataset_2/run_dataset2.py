@@ -3,7 +3,7 @@ from gp import evolve, mean_squared_error, normalized_mean_squared_error
 
 
 if __name__ == "__main__":
-    # Dataset 2 has three input columns and one output column.
+    # load the 3 inputs and y
     dataset2 = load_dataset2("data/dataset2.csv")
     training_data, test_data = split_dataset(dataset2, seed=42)
 

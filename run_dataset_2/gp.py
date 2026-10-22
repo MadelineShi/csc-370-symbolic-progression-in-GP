@@ -53,7 +53,7 @@ def fitness(candidate, training_data):
     if(len(training_data) == 0):
         raise ValueError("Training data is empty")
 
-    # Dataset 2 adds a small penalty so simpler equations are preferred when their errors are close.
+    # add a penalty so it doesnt keep making huge trees
     complexity_penalty = candidate.size() * COMPLEXITY_PENALTY_PER_NODE
 
     return mean_squared_error(candidate, training_data) + complexity_penalty
@@ -76,7 +76,7 @@ def tournament_selection(population, fitness_scores, tournament_size=3):
     if tournament_size < 1 or tournament_size > len(population):
         raise ValueError("Invalid tournament size")
 
-    indices = random.sample( # Randomly select the index of a participating tree
+    indices = random.sample( # pick the trees for the tournament
         range(len(population)),
         tournament_size
     )
@@ -105,7 +105,7 @@ def mutate(candidate, max_depth):
 
     selected_node = candidate.get_subtree(path)
 
-    # Dataset 2 uses real constants, so mutation can make a small adjustment instead of replacing them.
+    # if we picked a constant just move it a little
     if selected_node.op == "const":
         new_constant = selected_node.value + random.uniform(
             -CONSTANT_MUTATION_CHANGE,

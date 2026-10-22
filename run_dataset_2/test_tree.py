@@ -6,7 +6,7 @@ def check_structure(node, max_depth):
     if max_depth < 0:
         raise ValueError("Tree exceeds the maximum depth")
 
-    # Dataset 2 has three possible variable leaves instead of one.
+    # any of the 3 variables can be a leaf
     if node.op in ("x1", "x2", "x3"):
         if len(node.children) != 0:
             raise ValueError("Variables should have no children")
@@ -16,7 +16,7 @@ def check_structure(node, max_depth):
         if len(node.children) != 0:
             raise ValueError("Constant should have no children")
 
-        # Dataset 2 constants are real-valued rather than integers.
+        # constants are floats for dataset 2
         if type(node.value) is not float:
             raise ValueError("Dataset2 constants should be floats")
         return
@@ -32,7 +32,7 @@ def check_structure(node, max_depth):
 
 
 def test_evaluate():
-    # Dataset 2 test expression: (x1 + 2.5) * (x2 / x3).
+    # make (x1 + 2.5) * (x2 / x3) by hand
     candidate = tree(
         "*",
         children=(
@@ -60,7 +60,7 @@ def test_evaluate():
 
 
 def test_random_tree():
-    # A fixed seed makes failures reproducible.
+    # same seed so the test does the same thing
     random.seed(42)
     for max_depth in range(4):
         for _ in range(100):

@@ -9,7 +9,7 @@ from test_tree import check_structure
 
 random.seed(42)
 
-# Dataset 2 test data uses three inputs. This example is y = x1 + x2 + x3.
+# small fake dataset where y is just all 3 added
 training_data = [
     ((1.0, 2.0, 3.0), 6.0),
     ((2.0, 4.0, 1.0), 7.0),
@@ -27,7 +27,7 @@ for candidate in population:
 
 scores = evaluate_population(population, training_data)
 
-# use 100% mutation here to test the code
+# mutate everything for this test
 new_population = next_generation(
     population, scores, max_depth=3, mutation_rate=1.0
 )

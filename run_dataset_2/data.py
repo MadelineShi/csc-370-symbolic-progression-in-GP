@@ -6,10 +6,10 @@ def load_dataset2(filename):
 
     with open(filename, "r", newline="") as file:
         reader = csv.reader(file)
-        next(reader)  # skip the first row (the header)
+        next(reader)  # skip header
 
         for row in reader:
-            # Dataset 2 has three inputs instead of the one input in Dataset 1.
+            # dataset 2 has 3 inputs
             x1 = float(row[0])
             x2 = float(row[1])
             x3 = float(row[2])
@@ -31,11 +31,11 @@ def split_dataset(dataset, seed=42):
     training_data = shuffled_data[:split_position]
     test_data = shuffled_data[split_position:]
 
-    # Dataset 2 has rounded x3 values of 0 with large finite outputs, which cannot be learned using division.
+    # cant divide by the x3 values that got rounded to 0
     training_data = [row for row in training_data if row[0][2] != 0]
     test_data = [row for row in test_data if row[0][2] != 0]
 
-    # Dataset 2 inputs have very different sizes, so scale them to about 0 to 1.
+    # scale these since they are all really different sizes
     x1_scale = max(abs(inputs[0]) for inputs, y in training_data)
     x2_scale = max(abs(inputs[1]) for inputs, y in training_data)
     x3_scale = max(abs(inputs[2]) for inputs, y in training_data)

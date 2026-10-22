@@ -7,8 +7,8 @@ class tree:
         self.value = value
 
 
-    def __str__(self): # this is for testing if we are generating a legal formula!
-        # Dataset 2 has three variables instead of only x.
+    def __str__(self): # print the formula
+        # dataset 2 has 3 x values
         if self.op in ("x1", "x2", "x3"):
             return self.op
 
@@ -22,7 +22,7 @@ class tree:
 
 
     def evaluate(self, inputs):
-        # Dataset 2 passes all three inputs to every part of the tree.
+        # unpack the 3 inputs
         x1, x2, x3 = inputs
 
         if self.op == "x1":
@@ -37,7 +37,7 @@ class tree:
         if self.op == "const":
             return self.value
 
-        #if it is an operator, evalute its children!
+        # evaluate both sides first
         left = self.children[0].evaluate(inputs)
         right = self.children[1].evaluate(inputs)
 
@@ -51,7 +51,7 @@ class tree:
                 return left * right
 
         if self.op == "/":
-            # Dataset 2 has x3 values recorded as 0, so protect division to let these trees survive.
+            # dont let division by something tiny crash the run
             if abs(right) < 0.000001:
                 return 1.0
             return left / right
@@ -59,7 +59,7 @@ class tree:
         raise ValueError("Unknown operator")
 
     
-    def get_paths(self, path=()): # for mutation and crossover etc.
+    def get_paths(self, path=()): # paths used for mutation and crossover
         paths = [path]
 
         for i in range(len(self.children)):
@@ -80,7 +80,7 @@ class tree:
 
 
     def replace_subtree(self, path, replacement):
-        if len(path) == 0: # already arrive the node to be replaced
+        if len(path) == 0: # this is the node to replace
             return replacement
 
         index = path[0]
@@ -127,15 +127,15 @@ def random_tree(max_depth):
     if max_depth < 0:
         raise ValueError("max_depth cannot be negative")
 
-    if max_depth == 0 or random.random() < 0.3:  # we set the probability of creating a leaf node to 0.3
-        # Dataset 2 can use any of its three variables as a terminal.
+    if max_depth == 0 or random.random() < 0.3:  # sometimes stop early and make a leaf
+        # pick a variable or constant
         terminal = random.choice(["x1", "x2", "x3", "const"])
 
         if terminal in ("x1", "x2", "x3"):
             return tree(terminal, children = ())
 
-        # Dataset 2 allows real-valued constants instead of only integers.
-        # The wider range helps Dataset 2 find constants after input scaling.
+        # dataset 2 can use decimal constants
+        # wider range helps after scaling the inputs
         constant = random.uniform(-100, 100)
         return tree("const", children=(), value = constant)
     
