@@ -68,10 +68,6 @@ def test_random_tree():
             check_structure(candidate, max_depth)
     print("PASS: structure and depth of 400 random trees")
 
-    print("Example random expressions:")
-    for _ in range(5):
-        print(random_tree(3))
-
 
 if __name__ == "__main__":
     test_evaluate()

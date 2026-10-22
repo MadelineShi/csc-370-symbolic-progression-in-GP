@@ -42,6 +42,4 @@ for index in range(len(population)):
 for candidate in new_population:
     check_structure(candidate, 3)
 
-print("Old scores:", scores)
-print("New scores:", evaluate_population(new_population, training_data))
 print("PASS: one generation, valid structures, original trees preserved")

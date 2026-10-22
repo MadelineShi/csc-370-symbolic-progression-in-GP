@@ -50,9 +50,6 @@ def normalized_mean_squared_error(candidate, data):
 
 
 def fitness(candidate, training_data):
-    if(len(training_data) == 0):
-        raise ValueError("Training data is empty")
-
     # add a penalty so it doesnt keep making huge trees
     complexity_penalty = candidate.size() * COMPLEXITY_PENALTY_PER_NODE
 
@@ -63,8 +60,7 @@ def generate_population(population_size, max_depth):
     population = []
 
     for _ in range(population_size):
-        tree = random_tree(max_depth)
-        population.append(tree)
+        population.append(random_tree(max_depth))
             
     return population
 
@@ -94,8 +90,7 @@ def evaluate_population(population, training_data):
     fitness_scores = []
 
     for candidate in population:
-        score = fitness(candidate, training_data)
-        fitness_scores.append(score)
+        fitness_scores.append(fitness(candidate, training_data))
 
     return fitness_scores
 
@@ -115,15 +110,9 @@ def mutate(candidate, max_depth):
         return candidate.replace_subtree(path, replacement)
 
     available_depth = max_depth - len(path) 
-
-    if available_depth < 0:
-        raise ValueError("Selected node exceeds the depth limit")
-
     replacement = random_tree(available_depth)
 
-    mutated_tree = candidate.replace_subtree(path, replacement)
-
-    return mutated_tree
+    return candidate.replace_subtree(path, replacement)
 
 
 def crossover(candidate_a, candidate_b):
