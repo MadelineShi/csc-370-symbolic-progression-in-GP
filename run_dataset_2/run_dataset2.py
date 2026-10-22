@@ -1,5 +1,5 @@
 from data import load_dataset2, split_dataset
-from gp import evolve, mean_squared_error
+from gp import evolve, mean_squared_error, normalized_mean_squared_error
 
 
 if __name__ == "__main__":
@@ -31,3 +31,5 @@ if __name__ == "__main__":
     print("Final expression:", str(best_tree), flush=True)
     print("Training MSE:", mean_squared_error(best_tree, training_data), flush=True)
     print("Test MSE:", mean_squared_error(best_tree, test_data), flush=True)
+    print("Normalized training MSE:", normalized_mean_squared_error(best_tree, training_data), flush=True)
+    print("Normalized test MSE:", normalized_mean_squared_error(best_tree, test_data), flush=True)

@@ -25,6 +25,27 @@ def mean_squared_error(candidate, data):
     return total_error / len(data)
 
 
+def normalized_mean_squared_error(candidate, data):
+    mse = mean_squared_error(candidate, data)
+
+    total_y = 0
+    for inputs, y in data:
+        total_y += y
+
+    y_average = total_y / len(data)
+
+    total_variance = 0
+    for inputs, y in data:
+        total_variance += (y - y_average) ** 2
+
+    y_variance = total_variance / len(data)
+
+    if y_variance == 0:
+        return mse
+
+    return mse / y_variance
+
+
 def fitness(candidate, training_data):
     if(len(training_data) == 0):
         raise ValueError("Training data is empty")
@@ -145,6 +166,18 @@ def evolve(
 ):
     random.seed(seed)
 
+    total_y = 0
+    for inputs, y in training_data:
+        total_y += y
+
+    y_average = total_y / len(training_data)
+
+    total_variance = 0
+    for inputs, y in training_data:
+        total_variance += (y - y_average) ** 2
+
+    y_variance = total_variance / len(training_data)
+
     population = generate_population(population_size, initial_depth)
 
     for generation in range(generations + 1):
@@ -156,9 +189,14 @@ def evolve(
             if fitness_scores[i] < fitness_scores[best_index]:
                 best_index = i
 
+        normalized_mse = fitness_scores[best_index]
+        if y_variance != 0:
+            normalized_mse = normalized_mse / y_variance
+
         print(
             "Generation:", generation,
             "Best training MSE:", fitness_scores[best_index],
+            "Normalized MSE:", normalized_mse,
             "Expression:", str(population[best_index]),
             flush=True
         )
